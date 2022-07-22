@@ -10,15 +10,12 @@ interface PropList {
 const Home: NextPage = () => {
   const [value, setValue] = useState<string>('');
   const [list, setList] = useState<PropList[]>([]);
+
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('change', e.target.value);
     setValue(e.target.value);
   };
 
   const clickHandler = () => {
-    console.log('click');
-    // setList({ value: value });
-    // add object into list
     setList([...list, { value }]);
   };
 
