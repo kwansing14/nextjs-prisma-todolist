@@ -1,25 +1,40 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styled from '@emotion/styled';
+import { PrismaClient } from '@prisma/client';
 
 interface PropList {
   value: string;
+  name: string;
 }
 
-const Home: NextPage = () => {
-  const [value, setValue] = useState<string>('');
-  const [list, setList] = useState<PropList[]>([]);
+export async function getServerSideProps() {
+  const prisma = new PrismaClient();
+  const data = await prisma.list.findMany();
+  console.log(data);
+  return {
+    props: {
+      initialLists: data,
+    },
+  };
+}
 
+const Home: NextPage = ({ initialLists }: any) => {
+  const [value, setValue] = useState<string>('');
+  const [list, setList] = useState<PropList[]>(initialLists);
+  console.log('list--', list);
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };
 
-  const clickHandler = () => {
-    setList([...list, { value }]);
+  const clickHandler = async () => {
+    const response = await fetch('/api/lists', {
+      method: 'POST',
+      body: JSON.stringify({ value: value, name: 'Kwan' }),
+    });
+    console.log(response);
   };
-
-  console.log(list);
 
   return (
     <div>
@@ -37,7 +52,9 @@ const Home: NextPage = () => {
           </div>
           <List>
             {list.map((item, index) => (
-              <li key={index}>{item.value}</li>
+              <li key={index}>
+                {item.name}-{item.value}
+              </li>
             ))}
           </List>
         </Box>
