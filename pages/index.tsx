@@ -52,6 +52,7 @@ const Home: NextPage<Props> = ({ initialLists }) => {
       method: 'DELETE',
       body: JSON.stringify(id),
     });
+    const data = await response.json();
     setList([...list.filter((item) => item.id !== id)]);
   };
 
