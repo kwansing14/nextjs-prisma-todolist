@@ -7,12 +7,21 @@ import { PrismaClient } from '@prisma/client';
 interface PropList {
   value: string;
   name: string;
+  id: number;
+}
+interface Props {
+  initialLists: [
+    {
+      id: number;
+      value: string;
+      name: string;
+    }
+  ];
 }
 
 export async function getServerSideProps() {
   const prisma = new PrismaClient();
   const data = await prisma.list.findMany();
-  console.log(data);
   return {
     props: {
       initialLists: data,
@@ -20,10 +29,10 @@ export async function getServerSideProps() {
   };
 }
 
-const Home: NextPage = ({ initialLists }: any) => {
+const Home: NextPage<Props> = ({ initialLists }) => {
   const [value, setValue] = useState<string>('');
   const [list, setList] = useState<PropList[]>(initialLists);
-  console.log('list--', list);
+
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };
@@ -33,7 +42,17 @@ const Home: NextPage = ({ initialLists }: any) => {
       method: 'POST',
       body: JSON.stringify({ value: value, name: 'Kwan' }),
     });
-    console.log(response);
+    const data = await response.json();
+    setList([...list, data]);
+  };
+
+  const deleteHandler = async (id: number) => {
+    // setList(list.filter((item) => item.name !== 'Kwan'));
+    const response = await fetch('/api/deleteList', {
+      method: 'DELETE',
+      body: JSON.stringify(id),
+    });
+    setList([...list.filter((item) => item.id !== id)]);
   };
 
   return (
@@ -54,6 +73,7 @@ const Home: NextPage = ({ initialLists }: any) => {
             {list.map((item, index) => (
               <li key={index}>
                 {item.name}-{item.value}
+                <button onClick={() => deleteHandler(item.id)}>x</button>
               </li>
             ))}
           </List>
